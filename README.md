@@ -8,3 +8,5 @@
 - use: call `/coordinates/?video_title=...`
 - stop: `docker stop mycontainer`
 - remove: `docker rm mycontainer`
+
+Used as a micro service in [this small app](https://github.com/adeveloper-wq/youtube-map-backend).
