@@ -1,6 +1,6 @@
 # Coordinates from words (Spacy, Geopy)
 - uses NLP and geocoding to extract a location from a string of words
-- switching randomly between three different services for geocoding (Mapbox, Geonames, Nominatim) to stay below the rate limits
+- switching randomly between three different services for geocoding ([Mapbox](https://www.mapbox.com/), [GeoNames](https://www.geonames.org/), [Nominatim](https://nominatim.org/)) to stay below the rate limits
 
 ## How to run
 - build the docker-image: `docker build -t myimage .`
