@@ -12,21 +12,60 @@ app = FastAPI()
 nlp_wk = spacy.load('xx_ent_wiki_sm')
 
 # MAPBOX GEOCODER ODER GEONAMES
-locator_nominatim = geopy.geocoders.Nominatim(user_agent="mygeocoder")
+locator_nominatim = geopy.geocoders.Nominatim(user_agent="geocoder-awefawefawefawefawef")
 geocode_nominatim = RateLimiter(locator_nominatim.geocode, min_delay_seconds=1)
 
 mapbox_token = os.environ['MAPBOX_TOKEN'];
-geocode_mapbox = geopy.geocoders.MapBox(api_key=mapbox_token).geocode
+locator_mapbox = geopy.geocoders.MapBox(api_key=mapbox_token)
+geocode_mapbox = RateLimiter(locator_mapbox.geocode, min_delay_seconds=1)
 
 geonames_username = os.environ['GEONAMES_USERNAME']
-geocode_geonames = geopy.geocoders.GeoNames(username=geonames_username).geocode
+locator_geonames = geopy.geocoders.GeoNames(username=geonames_username)
+geocode_geonames = RateLimiter(locator_geonames.geocode, min_delay_seconds=1)
+
+def get_geocode(service: int, location_string: str):
+    if service == 0:
+        try:
+            return geocode_geonames(location_string)
+        except:
+            try:
+                return geocode_mapbox(location_string)
+            except:
+                try: 
+                    return geocode_geonames(location_string)
+                except:
+                    print("None", flush=True)
+                    return None
+    elif service == 1:
+        try:
+            return geocode_mapbox(location_string)
+        except:
+            try:
+                return geocode_geonames(location_string)
+            except:
+                try: 
+                    return geocode_mapbox(location_string)
+                except:
+                    print("None", flush=True)
+                    return None
+    elif service == 2:
+        try:
+            return geocode_geonames(location_string)
+        except:
+            try:
+                return geocode_geonames(location_string)
+            except:
+                try: 
+                    return geocode_mapbox(location_string)
+                except:
+                    print("None", flush=True)
+                    return None
 
 @app.get("/coordinates/")
 def get_coordinates(video_title: str = ""):
     start = time.time()    
     
     doc = nlp_wk(video_title)
-    #doc = nlp_wk("Vintage Culture at Museu do Amanhã, in Rio de Janeiro, Brazil for Cercle")
 
     location_strings = []
     for ent in doc.ents:
@@ -36,25 +75,29 @@ def get_coordinates(video_title: str = ""):
     locations_coordinates = []
     
     for location_string in location_strings:
+        
         random_service = randrange(3)
-        if random_service == 0:
-            geocode_result = geocode_nominatim(location_string)
+        
+        geocode_result = get_geocode(random_service, location_string)
+        point = None
+        if geocode_result is not None:
+            point = geocode_result.point
+        
+        count = 0
+        while geocode_result is None or point is None:
+            random_service = (random_service + 1) % 3
+            geocode_result = get_geocode(random_service, location_string)
             if geocode_result is not None:
                 point = geocode_result.point
-                if point is not None:
-                    locations_coordinates.append({'latitude': point.latitude, 'longitude': point.longitude})
-        elif random_service == 1:
-            geocode_result = geocode_mapbox(location_string)
-            if geocode_result is not None:
-                point = geocode_result.point
-                if point is not None:
-                    locations_coordinates.append({'latitude': point.latitude, 'longitude': point.longitude})
-        else:
-            geocode_result = geocode_geonames(location_string)
-            if geocode_result is not None:
-                point = geocode_result.point
-                if point is not None:
-                    locations_coordinates.append({'latitude': point.latitude, 'longitude': point.longitude})
+            else:
+                point = None
+            
+            count = count + 1
+            if count >= 3:
+                break
+        
+        if geocode_result is not None and point is not None:
+            locations_coordinates.append({'latitude': point.latitude, 'longitude': point.longitude})
                     
         if(len(locations_coordinates) > 0):
                 break
