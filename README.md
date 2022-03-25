@@ -1,4 +1,4 @@
-# Coordinates from words (Spacy, Geopy)
+# Coordinates from words (Spacy, Geopy) (work-in-progress)
 - uses NLP and geocoding to extract a location from a string of words
 - switching randomly between three different services for geocoding ([Mapbox](https://www.mapbox.com/), [GeoNames](https://www.geonames.org/), [Nominatim](https://nominatim.org/)) to stay below the rate limits
 
