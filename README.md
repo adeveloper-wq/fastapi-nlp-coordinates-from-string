@@ -4,7 +4,7 @@
 
 ## How to run
 - build the docker-image: `docker build -t myimage .`
-- run: `docker run -e MAPBOX_TOKEN=token -e GEONAMES_USERNAME=username --name mycontainer -p 80:80 myimage`
+- run: `docker run -e OPEN_CAGE_KEY=... -e MAPQUEST_KEY=... -e MAPTILER_KEY=... -e GEOCODIO_KEY=... -e HERE_KEY=... -e BING_MAPS_KEY=... -e MAPBOX_TOKEN=... -e GEONAMES_USERNAME=... -e PYTHONUNBUFFERED=TRUE --name mycontainer -p 80:80 myimage`
 - use: call `/coordinates/?video_title=...`
 - stop: `docker stop mycontainer`
 - remove: `docker rm mycontainer`
