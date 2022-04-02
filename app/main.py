@@ -61,52 +61,52 @@ def get_geocode(service: int, location_string: str, geocoders):
 def get_coordinates(video_title: str = "", advanced_location_search: str = "", language: str = "en"):
     video_title = video_title.replace('"', '').replace("|", "").replace("/", "")
     
-    geocoders = get_geocoders()
-    
-    doc = None
-    
-    location_strings = []
-    
-    if "en" in language:
-        doc = nlp_wk_en(video_title)
-        for ent in doc.ents:
-            if(ent.label_ == 'GPE'):
-                location_strings.append(ent.text)
-    elif "de" in language:
-        doc = nlp_wk_de(video_title)
-        for ent in doc.ents:
-            if(ent.label_ == 'LOC'):
-                location_strings.append(ent.text)
-    else:
-        doc = nlp_wk_multi(video_title)
-        for ent in doc.ents:
-            if(ent.label_ == 'LOC'):
-                location_strings.append(ent.text)
-                     
-            
     locations_coordinates = []
-        
-    random_service = 0
     
-    for location_string in location_strings:
-        random_service = randrange(9)
-        geocode_result = get_geocode(random_service, location_string, geocoders)
-        count = 0
-        while geocode_result is None:
-            random_service = (random_service + 1) % 9
-            geocode_result = get_geocode(random_service, location_string, geocoders)
-            count = count + 1
-            if count >= 9:
-                break
-        
-        if geocode_result is not None:
-            locations_coordinates.append({'latitude': geocode_result.latitude, 'longitude': geocode_result.longitude})  
-            print("1-" + location_string + " " + video_title)         
-        if(len(locations_coordinates) > 0):
-                break
-            
     cnx = None
+    
+    if len(locations_coordinates) == 0:
+        geocoders = get_geocoders()
+        
+        doc = None
+        
+        location_strings = []
+        
+        if "en" in language:
+            doc = nlp_wk_en(video_title)
+            for ent in doc.ents:
+                if(ent.label_ == 'GPE'):
+                    location_strings.append(ent.text)
+        elif "de" in language:
+            doc = nlp_wk_de(video_title)
+            for ent in doc.ents:
+                if(ent.label_ == 'LOC'):
+                    location_strings.append(ent.text)
+        else:
+            doc = nlp_wk_multi(video_title)
+            for ent in doc.ents:
+                if(ent.label_ == 'LOC'):
+                    location_strings.append(ent.text)
             
+        random_service = 0
+    
+        for location_string in location_strings:
+            random_service = randrange(9)
+            geocode_result = get_geocode(random_service, location_string, geocoders)
+            count = 0
+            while geocode_result is None:
+                random_service = (random_service + 1) % 9
+                geocode_result = get_geocode(random_service, location_string, geocoders)
+                count = count + 1
+                if count >= 9:
+                    break
+            
+            if geocode_result is not None:
+                locations_coordinates.append({'latitude': geocode_result.latitude, 'longitude': geocode_result.longitude})  
+                print("1-" + location_string + " " + video_title)         
+            if(len(locations_coordinates) > 0):
+                    break
+                
     if len(locations_coordinates) == 0:
         video_title = video_title.replace(" - ", " ").replace(":", "").replace("  ", " ")
         
@@ -126,7 +126,7 @@ def get_coordinates(video_title: str = "", advanced_location_search: str = "", l
                 locations_coordinates.append({'latitude': latitude, 'longitude': longitude})             
                 break
             
-    if len(locations_coordinates) == 0 :
+    """ if len(locations_coordinates) == 0 :
         video_title = video_title.replace(" - ", " ").replace(":", "").replace("  ", " ")
 
         cursor = cnx.cursor()
@@ -147,6 +147,6 @@ def get_coordinates(video_title: str = "", advanced_location_search: str = "", l
                     longitude = float(coordinates[1])
                     locations_coordinates.append({'latitude': latitude, 'longitude': longitude})  
                     print("3-" + word + " " + video_title)           
-                    break
+                    break """
         
     return locations_coordinates
